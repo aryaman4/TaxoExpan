@@ -88,7 +88,7 @@
     "trainer": {
         "epochs": 100,
 
-        "save_dir": "~/datadrive/structure_expan/saved/",
+        "save_dir": "datadrive/structure_expan/saved/",
         "save_period": 1,
         "verbosity": 2,
         
