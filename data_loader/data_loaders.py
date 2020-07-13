@@ -100,11 +100,11 @@ class MaskedGraphDataLoader(DataLoader):
         
     def __str__(self):
         return "\n\t".join([
-            f"MaskedGraphDataLoader mode: {self.mode}",
-            f"sampling_mode: {self.sampling_mode}",
-            f"batch_size: {self.batch_size}",
-            f"negative_size: {self.negative_size}",
-            f"expand_factor: {self.expand_factor}",
-            f"cache_refresh_time: {self.cache_refresh_time}",
-            f"normalize_embed: {self.normalize_embed}",
+            "MaskedGraphDataLoader mode: {}".format(self.mode),
+            "sampling_mode: {}".format(self.sampling_mode),
+            "batch_size: {}".format(self.batch_size),
+            "negative_size: {}".format(self.negative_size),
+            "expand_factor: {}".format(self.expand_factor),
+            "cache_refresh_time: {}".format(self.cache_refresh_time),
+            "normalize_embed: {}".format(self.normalize_embed),
         ])

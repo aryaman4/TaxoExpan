@@ -40,7 +40,7 @@ class TaxoExpan(BaseModel):
                 num_layers=options["num_layers"], heads=options["heads"], activation=F.leaky_relu, 
                 feat_drop=options["feat_drop"], attn_drop=options["attn_drop"])
         else:
-            assert f"Unacceptable Graph Propagation Method: {propagation_method}"
+            assert "Unacceptable Graph Propagation Method: {}".format(propagation_method)
 
         if readout_method == "MR":
             self.readout = MeanReadout()
@@ -55,7 +55,7 @@ class TaxoExpan(BaseModel):
             l_dim = options["out_dim"]*3
             r_dim = options["in_dim"]
         else:
-            assert f"Unacceptable Readout Method: {readout_method}"
+            assert "Unacceptable Readout Method: {}".format(readout_method)
 
         if matching_method == "MLP":
             self.match = MLP(l_dim, r_dim, options["hidden_dim"])
@@ -64,7 +64,7 @@ class TaxoExpan(BaseModel):
         elif matching_method == "BIM":
             self.match = BIM(l_dim, r_dim)
         else:
-            assert f"Unacceptable Matching Method: {matching_method}"
+            assert "Unacceptable Matching Method: {}".format(matching_method)
 
 
     def forward(self, g, h, qf):

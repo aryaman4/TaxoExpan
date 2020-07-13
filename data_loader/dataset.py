@@ -89,18 +89,18 @@ class MAGDataset(object):
         dir_path : str
             The path to a directory containing three input files. 
         """
-        node_file_name = os.path.join(dir_path, f"{self.name}.terms")
-        edge_file_name = os.path.join(dir_path, f"{self.name}.taxo")
+        node_file_name = os.path.join(dir_path, "{}.terms".format(self.name))
+        edge_file_name = os.path.join(dir_path, "{}.taxo".format(self.name))
         if self.embed_suffix == "":
-            embedding_file_name = os.path.join(dir_path, f"{self.name}.terms.embed")
-            output_pickle_file_name = os.path.join(dir_path, f"{self.name}.pickle.bin")
+            embedding_file_name = os.path.join(dir_path, "{}.terms.embed".format(self.name))
+            output_pickle_file_name = os.path.join(dir_path, "{}.pickle.bin".format(self.name))
         else:
-            embedding_file_name = os.path.join(dir_path, f"{self.name}.terms.{self.embed_suffix}.embed")
-            output_pickle_file_name = os.path.join(dir_path, f"{self.name}.{self.embed_suffix}.pickle.bin")
+            embedding_file_name = os.path.join(dir_path, "{}.terms.{}.embed".format(self.name, self.embed_suffix))
+            output_pickle_file_name = os.path.join(dir_path, "{}.{}.pickle.bin".format(self.name, self.embed_suffix))
         if self.existing_partition:
-            train_node_file_name = os.path.join(dir_path, f"{self.name}.terms.train")
-            validation_node_file_name = os.path.join(dir_path, f"{self.name}.terms.validation")
-            test_file_name = os.path.join(dir_path, f"{self.name}.terms.test")
+            train_node_file_name = os.path.join(dir_path, "{}.terms.train".format(self.name))
+            validation_node_file_name = os.path.join(dir_path, "{}.terms.validation".format(self.name))
+            test_file_name = os.path.join(dir_path, "{}.terms.test".format(self.name))
         
         tx_id2taxon = {}
         taxonomy = nx.DiGraph()
@@ -111,7 +111,7 @@ class MAGDataset(object):
                 line = line.strip()
                 if line:
                     segs = line.split("\t")
-                    assert len(segs) == 2, f"Wrong number of segmentations {line}"
+                    assert len(segs) == 2, "Wrong number of segmentations {}".format(line)
                     taxon = Taxon(tx_id=segs[0], norm_name=segs[1], display_name=segs[1])
                     tx_id2taxon[segs[0]] = taxon
                     taxonomy.add_node(taxon)
@@ -122,7 +122,7 @@ class MAGDataset(object):
                 line = line.strip()
                 if line:
                     segs = line.split("\t")
-                    assert len(segs) == 2, f"Wrong number of segmentations {line}"
+                    assert len(segs) == 2, "Wrong number of segmentations {}".format(line)
                     parent_taxon = tx_id2taxon[segs[0]]
                     child_taxon = tx_id2taxon[segs[1]]
                     taxonomy.add_edge(parent_taxon, child_taxon)
@@ -130,7 +130,7 @@ class MAGDataset(object):
         # load embedding features
         print("Loading embedding ...")
         embeddings = KeyedVectors.load_word2vec_format(embedding_file_name)
-        print(f"Finish loading embedding of size {embeddings.vectors.shape}")
+        print("Finish loading embedding of size {}".format(embeddings.vectors.shape))
 
         # load train/validation/test partition files if needed
         if self.existing_partition:
@@ -191,7 +191,7 @@ class MAGDataset(object):
                 "test_node_ids": self.test_node_ids,
             }
             pickle.dump(data, fout, pickle.HIGHEST_PROTOCOL)
-        print(f"Save pickled dataset to {output_pickle_file_name}")
+        print("Save pickled dataset to {}".format(output_pickle_file_name))
 
     def _load_node_list(self, file_path):
         node_list = []
@@ -263,11 +263,11 @@ class MaskedGraphDataset(Dataset):
         if mode == "validation":
             for node in graph_dataset.validation_node_ids:
                 edge_to_remove.extend(list(self.graph.in_edges(node)))
-            print(f"Remove {len(edge_to_remove)} edges between validation nodes and training nodes")
+            print("Remove {} edges between validation nodes and training nodes".format(len(edge_to_remove)))
         elif mode == "test":
             for node in graph_dataset.test_node_ids:
                 edge_to_remove.extend(list(self.graph.in_edges(node)))
-            print(f"Remove {len(edge_to_remove)} edges between test nodes and training nodes")
+            print("Remove {} edges between test nodes and training nodes".format(len(edge_to_remove)))
         self.graph.remove_edges_from(edge_to_remove)
 
         # used for caching local subgraphs
@@ -279,10 +279,10 @@ class MaskedGraphDataset(Dataset):
         self.queue = (graph_dataset.train_node_ids * 5).copy()
 
         end = time.time()
-        print(f"Finish loading dataset ({end-start} seconds)")
+        print("Finish loading dataset ({} seconds)".format(end-start))
 
     def __str__(self):
-        return f"MaskedGraphDataset mode:{self.mode}"
+        return "MaskedGraphDataset mode:{}".format(self.mode)
 
     def __len__(self):
         return len(self.node_list)
@@ -372,7 +372,7 @@ class MaskedGraphDataset(Dataset):
                 random.shuffle(self.queue)
             max_try += 1
             if max_try > 10:  # corner cases, trim/expand negatives to the size
-                print(f"Alert in _get_exactly_k_negatives, query_node: {query_node}, current negative size: {len(negatives)}")
+                print("Alert in _get_exactly_k_negatives, query_node: {}, current negative size: {}".format(query_node, len(negatives)))
                 if len(negatives) > negative_size:
                     negatives = negatives[:negative_size]
                 else:
@@ -416,12 +416,12 @@ class MaskedGraphDataset(Dataset):
             if self.graph.out_degree(anchor_node) <= self.expand_factor:
                 siblings = [edge[1] for edge in self.graph.out_edges(anchor_node)]
             else:
-                siblings = [edge[1] for edge in random.choices(list(self.graph.out_edges(anchor_node)), k=self.expand_factor)]
+                siblings = [edge[1] for edge in random.sample(list(self.graph.out_edges(anchor_node)), k=self.expand_factor)]
         else:  # positive example. remove query_node from the children set of anchor_node
             if self.graph.out_degree(anchor_node) <= self.expand_factor:
                 siblings = [edge[1] for edge in self.graph.out_edges(anchor_node) if edge[1] != query_node]
             else:
-                siblings = [edge[1] for edge in random.choices(list(self.graph.out_edges(anchor_node)), k=self.expand_factor) if edge[1] != query_node]
+                siblings = [edge[1] for edge in random.sample(list(self.graph.out_edges(anchor_node)), k=self.expand_factor) if edge[1] != query_node]
         nodes.extend(siblings)
         nodes_pos.extend([2]*len(siblings))
 

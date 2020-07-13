@@ -83,7 +83,7 @@ class Trainer(BaseTrainer):
 
         if self.lr_scheduler is not None:
             if isinstance(self.lr_scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
-                print(f"log['val_metrics]: {log['val_metrics']}")
+                print("log['val_metrics]: {}".format(log['val_metrics']))
                 if self.lr_scheduler_mode == "min":
                     self.lr_scheduler.step(log['val_metrics'][0])  # TODO: for MAG-CS, early stop on MR
                 else:

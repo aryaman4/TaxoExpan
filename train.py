@@ -45,7 +45,7 @@ def main(config):
 
     trainer.train()
     end = time.time()
-    logger.info(f"Finish training in {end-start} seconds")
+    logger.info("Finish training in {} seconds".format(end-start))
 
 
 if __name__ == '__main__':
