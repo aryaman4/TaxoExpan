@@ -404,12 +404,14 @@ class MaskedGraphDataset(Dataset):
     def _get_subgraph(self, query_node, anchor_node, instance_mode):
         # grand parents of query node (i.e., parents of anchor node)
         nodes = [edge[0] for edge in self.graph.in_edges(anchor_node)]  
-        nodes_pos = [0] * len(nodes)
-        
+        gp_nodes = [edge[0] for edge in self.graph.in_edges(n) for n in nodes]
+        nodes_pos = [0] * len(gp_nodes)
+        nodes_pos.extend([1] * len(nodes))
+        nodes = gp_nodes + nodes
         # parent of query  (i.e., anchor node itself)
         parent_node_idx = len(nodes)
         nodes.append(anchor_node)  
-        nodes_pos.append(1)
+        nodes_pos.append(2)
         
         # siblings of query node (i.e., children of anchor node)
         if instance_mode == 0:  # negative example. do not need to worry about query_node appears to be the child of anchor_node
@@ -423,7 +425,7 @@ class MaskedGraphDataset(Dataset):
             else:
                 siblings = [edge[1] for edge in random.sample(list(self.graph.out_edges(anchor_node)), k=self.expand_factor) if edge[1] != query_node]
         nodes.extend(siblings)
-        nodes_pos.extend([2]*len(siblings))
+        nodes_pos.extend([3]*len(siblings))
 
         # create dgl graph with features
         g = dgl.DGLGraph()
