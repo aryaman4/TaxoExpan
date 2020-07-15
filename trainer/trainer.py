@@ -42,12 +42,13 @@ class Trainer(BaseTrainer):
         self.model.train()
         total_loss = 0
         for batch_idx, batch_example in enumerate(self.data_loader):
-            print(batch_example)
             bg = batch_example[0]
             nf = batch_example[1].to(self.device)
             label = batch_example[2].to(self.device)
             h = bg.ndata.pop('x').to(self.device)
-            
+            print(bg)
+            print(nf)
+            print(h)
             self.optimizer.zero_grad()
             prediction = self.model(bg, h, nf)
             if self.is_infonce_training:
