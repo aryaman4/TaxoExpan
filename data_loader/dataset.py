@@ -436,7 +436,7 @@ class MaskedGraphDataset(Dataset):
         # create dgl graph with features
         g = dgl.DGLGraph()
         g.add_nodes(len(nodes), {"x": self.node_features[nodes, :], "_id": torch.tensor(nodes), "pos": torch.tensor(nodes_pos)})
-        g.add_edges(list(range(parent_node_idx)), parent_node_idx)
+        g.add_edges(list(range(len(gp_nodes), parent_node_idx+1)), parent_node_idx)
         g.add_edges(parent_node_idx, list(range(parent_node_idx+1, len(nodes))))
         for i, gp in enumerate(gp_nodes):
             g.add_edges(i, len(gp_nodes) + gp_index[gp])
