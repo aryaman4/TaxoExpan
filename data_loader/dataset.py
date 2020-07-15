@@ -404,7 +404,10 @@ class MaskedGraphDataset(Dataset):
     def _get_subgraph(self, query_node, anchor_node, instance_mode):
         # grand parents of query node (i.e., parents of anchor node)
         nodes = [edge[0] for edge in self.graph.in_edges(anchor_node)]  
-        gp_nodes = [edge[0] for edge in self.graph.in_edges(n) for n in nodes]
+        gp_nodes = []
+        for n in nodes:
+            for edge in self.graph.in_edges(n):
+                gp_nodes.append(edge[0])
         nodes_pos = [0] * len(gp_nodes)
         nodes_pos.extend([1] * len(nodes))
         nodes = gp_nodes + nodes
