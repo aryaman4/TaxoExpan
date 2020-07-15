@@ -439,7 +439,7 @@ class MaskedGraphDataset(Dataset):
         g.add_edges(list(range(parent_node_idx)), parent_node_idx)
         g.add_edges(parent_node_idx, list(range(parent_node_idx+1, len(nodes))))
         for i, gp in enumerate(gp_nodes):
-            g.add_edges(i, gp_index[gp])
+            g.add_edges(i, len(gp_nodes) + gp_index[gp])
         # add self-cycle
         g.add_edges(g.nodes(), g.nodes())
 
