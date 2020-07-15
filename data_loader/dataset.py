@@ -405,9 +405,12 @@ class MaskedGraphDataset(Dataset):
         # grand parents of query node (i.e., parents of anchor node)
         nodes = [edge[0] for edge in self.graph.in_edges(anchor_node)]  
         gp_nodes = []
-        for n in nodes:
+        gp_index = {}
+        for i,n in enumerate(nodes):
             for edge in self.graph.in_edges(n):
                 gp_nodes.append(edge[0])
+                gp_index[edge[0]] = i
+        
         nodes_pos = [0] * len(gp_nodes)
         nodes_pos.extend([1] * len(nodes))
         nodes = gp_nodes + nodes
@@ -435,7 +438,8 @@ class MaskedGraphDataset(Dataset):
         g.add_nodes(len(nodes), {"x": self.node_features[nodes, :], "_id": torch.tensor(nodes), "pos": torch.tensor(nodes_pos)})
         g.add_edges(list(range(parent_node_idx)), parent_node_idx)
         g.add_edges(parent_node_idx, list(range(parent_node_idx+1, len(nodes))))
-
+        for i, gp in enumerate(gp_nodes):
+            g.add_edges(i, gp_index[gp])
         # add self-cycle
         g.add_edges(g.nodes(), g.nodes())
 
