@@ -34,7 +34,7 @@ def main(config, args_outer):
     # case_study or not
     need_case_study = (args_outer.case != "")
     if need_case_study:
-        logger.info(f"save case study results to {args_outer.case}")
+        logger.info("save case study results to {}".format(args_outer.case))
     else:
         logger.info("no need to save case study results")
 
@@ -91,7 +91,7 @@ def main(config, args_outer):
         indice2word = test_dataset.vocab
     node2parents = test_dataset.node2parents
     candidate_positions = sorted(list(test_dataset.all_positions))
-    logger.info(f"Number of queries: {len(vocab)}")
+    logger.info("Number of queries: {}".format(len(vocab)))
     anchor2subgraph = {}
     for anchor in tqdm(candidate_positions):
         anchor2subgraph[anchor] = test_dataset._get_subgraph(-1, anchor, 0)
@@ -148,7 +148,7 @@ def main(config, args_outer):
 
     else:  # large dataset with many batches
         # obtain graph representation
-        logger.info(f'Large batch mode with batch_size = {args_outer.batch_size}')
+        logger.info('Large batch mode with batch_size = {}'.format(args_outer.batch_size))
         batched_hg = []  # save the CPU graph representation
         batched_positions = []
         bg = []
@@ -162,7 +162,7 @@ def main(config, args_outer):
                     h = bg.ndata.pop('x').to(device)
                     pos = bg.ndata['pos'].to(device)
                     hg = encode_graph(model, bg, h, pos)
-                    assert hg.shape[0] == len(positions), f"mismatch between hg.shape[0]: {hg.shape[0]} and len(positions): {len(positions)}"
+                    assert hg.shape[0] == len(positions), "mismatch between hg.shape[0]: {} and len(positions): {}".format(hg.shape[0],len(positions))
                     batched_hg.append(hg.cpu())
                     batched_positions.append(positions)
                     bg = []
@@ -173,7 +173,7 @@ def main(config, args_outer):
                 h = bg.ndata.pop('x').to(device)
                 pos = bg.ndata['pos'].to(device)
                 hg = encode_graph(model, bg, h, pos)
-                assert hg.shape[0] == len(positions), f"mismatch between hg.shape[0]: {hg.shape[0]} and len(positions): {len(positions)}"
+                assert hg.shape[0] == len(positions), "mismatch between hg.shape[0]: {} and len(positions): {}".format(hg.shape[0], len(positions))
                 batched_hg.append(hg.cpu())
                 batched_positions.append(positions)
                 del h
