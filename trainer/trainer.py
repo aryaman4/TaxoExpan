@@ -46,7 +46,6 @@ class Trainer(BaseTrainer):
             nf = batch_example[1].to(self.device)
             label = batch_example[2].to(self.device)
             h = bg.ndata.pop('x').to(self.device)
-            
             self.optimizer.zero_grad()
             prediction = self.model(bg, h, nf)
             if self.is_infonce_training:
