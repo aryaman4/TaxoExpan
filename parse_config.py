@@ -9,15 +9,15 @@ from utils import read_json, write_json
 
 
 class ConfigParser:
-    def __init__(self, args, options='', timestamp=True):
+    def __init__(self, args=None, options='', timestamp=True, default_vals=None):
         # parse default and custom cli options
         for opt in options:
             args.add_argument(*opt.flags, default=None, type=opt.type)
         args = args.parse_args()
 
-        if args.device:
+        if args is not None and args.device:
             os.environ["CUDA_VISIBLE_DEVICES"] = args.device
-        if args.resume:
+        if args is not None and args.resume:
             self.resume = Path(args.resume)
             self.cfg_fname = self.resume.parent / 'config.json'
         else:
@@ -25,7 +25,9 @@ class ConfigParser:
             assert args.config is not None, msg_no_cfg
             self.resume = None
             self.cfg_fname = Path(args.config)
-
+        if default_vals is not None:
+            self.cfg_fname = default_vals['config_path']
+            os.environ["CUDA_VISIBLE_DEVICES"] = 0
         # load config file and apply custom cli options
         config = read_json(self.cfg_fname)
         self.__config = _update_config(config, options, args)
@@ -53,6 +55,9 @@ class ConfigParser:
             1: logging.INFO,
             2: logging.DEBUG
         }
+
+        
+
 
     def initialize(self, name, module, *args):
         """
