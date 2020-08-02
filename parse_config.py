@@ -28,7 +28,7 @@ class ConfigParser:
 
         if default_vals is not None:
             self.cfg_fname = default_vals['config_path']
-            os.environ["CUDA_VISIBLE_DEVICES"] = 0
+            os.environ["CUDA_VISIBLE_DEVICES"] = "0"
         # load config file and apply custom cli options
         config = read_json(self.cfg_fname)
         self.__config = _update_config(config, options, args)
