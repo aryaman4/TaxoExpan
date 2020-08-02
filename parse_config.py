@@ -13,7 +13,8 @@ class ConfigParser:
         # parse default and custom cli options
         for opt in options:
             args.add_argument(*opt.flags, default=None, type=opt.type)
-        args = args.parse_args()
+        if args is not None:
+            args = args.parse_args()
 
         if args is not None and args.device:
             os.environ["CUDA_VISIBLE_DEVICES"] = args.device
