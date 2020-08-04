@@ -30,6 +30,8 @@ class ConfigParser:
         if default_vals is not None:
             self.cfg_fname = Path(default_vals['config_path'])
            # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+            os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
             self.resume = None
         # load config file and apply custom cli options
         config = read_json(self.cfg_fname)
@@ -38,7 +40,7 @@ class ConfigParser:
         # set save_dir where trained model and log will be saved.
         save_dir = Path(self.config['trainer']['save_dir'])
         timestamp = datetime.now().strftime(r'%m%d_%H%M%S') if timestamp else ''
-        if args is not None and "suffix" in args and args.suffix != "":
+        if "suffix" in args and args.suffix != "":
             timestamp = timestamp + "_" + args.suffix
 
         exper_name = self.config['name']
