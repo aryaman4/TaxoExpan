@@ -16,7 +16,7 @@ from test_fast import encode_graph, rearrange
 import itertools
 
 class TaxoClean(object):
-    def __init__(self, config_path="../config_files/config.mag.json"):
+    def __init__(self, config_path="./config_files/config.mag.json"):
         self.config = ConfigParser(default_vals={'config_path': config_path})
        
     def run_trainer(self):
@@ -105,6 +105,7 @@ class TaxoClean(object):
                     true_parent_rank_dict[indice2word[tp_index]] = rank_dict[tp_index]
                 print(indice2word[query])
                 print(true_parent_rank_dict)
+                break
 
 
 if __name__ == '__main__':

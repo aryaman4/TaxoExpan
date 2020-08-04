@@ -40,12 +40,12 @@
         "args":{
             "data_path": "./data/MAG-CS/computer_science.pickle.bin",
             "sampling_mode": 0,
-            "batch_size": 128,
+            "batch_size": 16,
             "batch_type": "small_batch",
             "negative_size": 256,
             "expand_factor": 50, 
             "shuffle": true,
-            "num_workers": 20,
+            "num_workers": 10,
             "cache_refresh_time": 100000000,
             "normalize_embed": true
         }
