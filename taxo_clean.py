@@ -14,6 +14,7 @@ import dgl
 import sys
 from test_fast import encode_graph, rearrange
 import itertools
+from data_loader.dataset import MAGDataset
 
 class TaxoClean(object):
     def __init__(self, config_path="./TaxoExpan/config_files/config.mag.json"):
@@ -30,6 +31,7 @@ class TaxoClean(object):
         trainer.train()
 
     def initialize_data(self):
+        binary_dataset = MAGDataset(name="computer_science", path="./TaxoExpan/data/MAG-CS/", raw=True)
         self.train_data_loader = self.config.initialize('train_data_loader', module_data, "train")
         self.validation_data_loader = self.config.initialize('validation_data_loader', module_data, "validation")
          # build model architecture, then print to console
