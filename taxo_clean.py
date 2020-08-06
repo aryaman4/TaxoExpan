@@ -16,8 +16,9 @@ from test_fast import encode_graph, rearrange
 import itertools
 
 class TaxoClean(object):
-    def __init__(self, config_path="./config_files/config.mag.json"):
+    def __init__(self, config_path="./TaxoExpan/config_files/config.mag.json"):
         self.config = ConfigParser(default_vals={'config_path': config_path})
+        self.ranking_dict = {}
        
     def run_trainer(self):
         trainer = Trainer(self.model, self.loss, self.metrics, self.pre_metric, self.optimizer,
@@ -87,7 +88,7 @@ class TaxoClean(object):
         # start per query prediction
         # total_metrics = torch.zeros(len(metric_fns))
         with torch.no_grad():
-            for query in tqdm(vocab):
+            for query in vocab:
                 nf = torch.tensor(kv[str(query)], dtype=torch.float32).to(device)
                 expanded_nf = nf.expand(n_position, -1)
                 energy_scores = self.model.match(hg, expanded_nf)
@@ -105,7 +106,10 @@ class TaxoClean(object):
                     true_parent_rank_dict[indice2word[tp_index]] = rank_dict[tp_index]
                 print(indice2word[query])
                 print(true_parent_rank_dict)
-                break
+                for parent, rank in true_parent_rank_dict.items():
+                    if parent not in self.ranking_dict:
+                        self.ranking_dict[parent] = []
+                    self.ranking_dict[parent].append(rank)
 
 
 if __name__ == '__main__':
