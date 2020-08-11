@@ -117,7 +117,14 @@ class TaxoClean(object):
 if __name__ == '__main__':
     k = sys.argv[1]
     tc = TaxoClean()
+    f = open("rank_results.txt", "w+")
     for _ in range(int(k)):
         tc.initialize_data()
         tc.run_trainer()
         tc.run_ranking()
+    for k, v in tc.ranking_dict.items():
+        f.write(str(k))
+        for rank in v:
+            f.write(" ")
+            f.write(str(rank))
+        f.write("\n")

@@ -170,7 +170,7 @@ class MAGDataset(object):
                 if taxonomy.out_degree(node) == 0:
                     leaf_node_ids.append(tx_id2node_id[node.tx_id])
             
-            random.seed(47)
+            #random.seed(47)
             random.shuffle(leaf_node_ids)
             validation_size = int(len(leaf_node_ids) * 0.1)
             test_size = int(len(leaf_node_ids) * 0.1)
