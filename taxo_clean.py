@@ -20,6 +20,7 @@ class TaxoClean(object):
     def __init__(self, config_path="./TaxoExpan/config_files/config.mag.json"):
         self.config = ConfigParser(default_vals={'config_path': config_path})
         self.ranking_dict = {}
+        self.node_cov = {}
        
     def run_trainer(self):
         trainer = Trainer(self.model, self.loss, self.metrics, self.pre_metric, self.optimizer,
@@ -49,11 +50,8 @@ class TaxoClean(object):
         self.trainable_params = filter(lambda p: p.requires_grad, self.model.parameters())
         self.optimizer = self.config.initialize('optimizer', torch.optim, self.trainable_params)
         self.lr_scheduler = self.config.initialize('lr_scheduler', torch.optim.lr_scheduler, self.optimizer)
-
-    def run_ranking(self):
-        logger = self.config.get_logger('test')
         test_data_path = self.config['test_data_loader']['args']['data_path']
-        test_data_loader = module_data.MaskedGraphDataLoader(
+        self.test_data_loader = module_data.MaskedGraphDataLoader(
             mode="test", 
             data_path=test_data_path,
             sampling_mode=0,
@@ -65,9 +63,13 @@ class TaxoClean(object):
             cache_refresh_time=self.config['test_data_loader']['args']['cache_refresh_time'],
             normalize_embed=self.config['test_data_loader']['args']['normalize_embed']
         )
+        self.full_size = len(self.train_data_loader.dataset.node_list) + len(self.validation_data_loader.dataset.node_list) + len(self.test_data_loader.dataset.node_list)
+
+    def run_ranking(self):
+        logger = self.config.get_logger('test')
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         # metric_fns = [getattr(module_metric, met) for met in self.config['metrics']]
-        test_dataset = test_data_loader.dataset
+        test_dataset = self.test_data_loader.dataset
         kv = test_dataset.kv
         vocab = test_dataset.node_list
         indice2word = test_dataset.vocab
@@ -108,20 +110,33 @@ class TaxoClean(object):
                     true_parent_rank_dict[indice2word[tp_index]] = rank_dict[tp_index]
                 print(indice2word[query])
                 print(true_parent_rank_dict)
-                for parent, rank in true_parent_rank_dict.items():
-                    if parent not in self.ranking_dict:
-                        self.ranking_dict[parent] = []
-                    self.ranking_dict[parent].append(rank)
+                q = indice2word[query]
+                if q not in self.ranking_dict:
+                    self.ranking_dict[q] = []
+                for rank in true_parent_rank_dict.values():
+                    self.ranking_dict[q].append(rank)
+    def run_full_routine(self):
+        i = 0
+        while True:
+            print(i)
+            i+=1
+            self.initialize_data()
+            test_dataset = self.test_data_loader.dataset
+            vocab = test_dataset.node_list
+            indice2word = test_dataset.vocab
+            for node in vocab:
+                self.node_cov[indice2word[node]] = 1
+            self.run_trainer()
+            self.run_ranking()
+            if len(self.node_cov.keys()) == self.full_size:
+                break
+            
 
 
 if __name__ == '__main__':
-    k = sys.argv[1]
     tc = TaxoClean()
     f = open("rank_results.txt", "w+")
-    for _ in range(int(k)):
-        tc.initialize_data()
-        tc.run_trainer()
-        tc.run_ranking()
+    tc.run_full_routine()
     for k, v in tc.ranking_dict.items():
         f.write(str(k))
         for rank in v:
