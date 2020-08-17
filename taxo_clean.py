@@ -126,6 +126,8 @@ class TaxoClean(object):
             indice2word = test_dataset.vocab
             for node in vocab:
                 self.node_cov[indice2word[node]] = 1
+            print(len(self.node_cov.keys()))
+            print(self.full_size)
             self.run_trainer()
             self.run_ranking()
             if len(self.node_cov.keys()) == self.full_size:
