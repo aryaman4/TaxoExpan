@@ -172,6 +172,7 @@ class MAGDataset(object):
             
             #random.seed(47)
             random.shuffle(leaf_node_ids)
+            self.len_leaf_nodes = len(leaf_node_ids)
             validation_size = int(len(leaf_node_ids) * 0.1)
             test_size = int(len(leaf_node_ids) * 0.1)
             self.validation_node_ids = leaf_node_ids[:validation_size]

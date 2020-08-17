@@ -26,13 +26,14 @@ class TaxoClean(object):
         trainer = Trainer(self.model, self.loss, self.metrics, self.pre_metric, self.optimizer,
                             config=self.config,
                             data_loader=self.train_data_loader,
-                            valid_data_loader=self.validation_data_loader,
+                            valid_data_loader=self.valid_data_loader,
                             lr_scheduler=self.lr_scheduler)
 
         trainer.train()
 
     def initialize_data(self):
         binary_dataset = MAGDataset(name="computer_science", path="./TaxoExpan/data/MAG-CS/", raw=True)
+        self.full_size = binary_dataset.len_leaf_nodes
         self.train_data_loader = self.config.initialize('train_data_loader', module_data, "train")
         self.validation_data_loader = self.config.initialize('validation_data_loader', module_data, "validation")
          # build model architecture, then print to console
@@ -63,7 +64,6 @@ class TaxoClean(object):
             cache_refresh_time=self.config['test_data_loader']['args']['cache_refresh_time'],
             normalize_embed=self.config['test_data_loader']['args']['normalize_embed']
         )
-        self.full_size = len(self.train_data_loader.dataset.node_list) + len(self.validation_data_loader.dataset.node_list) + len(self.test_data_loader.dataset.node_list)
 
     def run_ranking(self):
         logger = self.config.get_logger('test')
