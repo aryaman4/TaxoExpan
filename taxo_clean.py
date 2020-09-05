@@ -17,10 +17,14 @@ import itertools
 from data_loader.dataset import MAGDataset
 
 class TaxoClean(object):
-    def __init__(self, config_path="./TaxoExpan/config_files/config.mag.json"):
+    def __init__(self, config_path="./TaxoExpan/config_files/config.mag.json",candidate_path="../candidates50.txt"):
         self.config = ConfigParser(default_vals={'config_path': config_path})
         self.ranking_dict = {}
         self.node_cov = {}
+        with open(candidate_path, 'r') as f:
+            self.candidate_list = [ix.split(' ')[0] for ix in f.readlines()]
+        
+        
        
     def run_trainer(self):
         trainer = Trainer(self.model, self.loss, self.metrics, self.pre_metric, self.optimizer,
@@ -104,17 +108,19 @@ class TaxoClean(object):
                 rank_dict = {}
                 for predict_index, parent_index in enumerate(predict_parent_idx_list):
                     rank_dict[parent_index] = predict_index
-                true_parent_indices = node2parents[query]
-                true_parent_rank_dict = {}
-                for tp_index in true_parent_indices:
-                    true_parent_rank_dict[indice2word[tp_index]] = rank_dict[tp_index]
-                print(indice2word[query])
-                print(true_parent_rank_dict)
+                # true_parent_indices = node2parents[query]
+                # true_parent_rank_dict = {}
+                # for tp_index in true_parent_indices:
+                #     true_parent_rank_dict[indice2word[tp_index]] = rank_dict[tp_index]
+                # print(indice2word[query])
+                # print(true_parent_rank_dict)
                 q = indice2word[query]
+                if q not in self.candidate_list:
+                    continue
                 if q not in self.ranking_dict:
-                    self.ranking_dict[q] = []
-                for rank in true_parent_rank_dict.values():
-                    self.ranking_dict[q].append(rank)
+                    self.ranking_dict[q] = [indice2word[ix] for ix in predict_parent_idx_list[:5]]
+                # for rank in true_parent_rank_dict.values():
+                #     self.ranking_dict[q].append(rank)
     def run_full_routine(self):
         i = 0
         while True:
@@ -125,19 +131,20 @@ class TaxoClean(object):
             vocab = test_dataset.node_list
             indice2word = test_dataset.vocab
             for node in vocab:
-                self.node_cov[indice2word[node]] = 1
+                if indice2word[node] in self.candidate_list:
+                    self.node_cov[indice2word[node]] = 1
             print(len(self.node_cov.keys()))
-            print(self.full_size)
+            # print(self.full_size)
             self.run_trainer()
             self.run_ranking()
-            if len(self.node_cov.keys()) == self.full_size:
+            if len(self.node_cov.keys()) == len(self.candidate_list):
                 break
             
 
 
 if __name__ == '__main__':
     tc = TaxoClean()
-    f = open("rank_results.txt", "w+")
+    f = open("rank_results_parents.txt", "w+")
     tc.run_full_routine()
     for k, v in tc.ranking_dict.items():
         f.write(str(k))
