@@ -26,7 +26,7 @@ class TaxoClean(object):
         trainer = Trainer(self.model, self.loss, self.metrics, self.pre_metric, self.optimizer,
                             config=self.config,
                             data_loader=self.train_data_loader,
-                            valid_data_loader=self.valid_data_loader,
+                            valid_data_loader=self.validation_data_loader,
                             lr_scheduler=self.lr_scheduler)
 
         trainer.train()
