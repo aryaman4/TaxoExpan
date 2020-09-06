@@ -26,7 +26,7 @@ class TaxoClean(object):
             self.candidate_list = []
             for ix in candidates:
                 a_index = ix.index('@')
-                first_part = ix[:a_index+3]
+                left_part = ix[:a_index+3]
                 l = ix[a_index+3:]
                 right_part = l.split(' ')[0]
                 self.candidate_list.append(left_part+right_part)
