@@ -22,10 +22,15 @@ class TaxoClean(object):
         self.ranking_dict = {}
         self.node_cov = {}
         with open(candidate_path, 'r') as f:
-            self.candidate_list = [ix.split(' ')[0] for ix in f.readlines()]
+            candidates = [ix for ix in f.readlines()]
+            self.candidate_list = []
+            for ix in candidates:
+                a_index = ix.index('@')
+                first_part = ix[:a_index+3]
+                l = ix[a_index+3:]
+                right_part = l.split(' ')[0]
+                self.candidate_list.append(left_part+right_part)
             print(self.candidate_list)
-        
-        
        
     def run_trainer(self):
         trainer = Trainer(self.model, self.loss, self.metrics, self.pre_metric, self.optimizer,
