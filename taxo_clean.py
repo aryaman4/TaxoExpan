@@ -17,12 +17,13 @@ import itertools
 from data_loader.dataset import MAGDataset
 
 class TaxoClean(object):
-    def __init__(self, config_path="./TaxoExpan/config_files/config.mag.json",candidate_path="../candidates50.txt"):
+    def __init__(self, config_path="./TaxoExpan/config_files/config.mag.json",candidate_path="./candidates50.txt"):
         self.config = ConfigParser(default_vals={'config_path': config_path})
         self.ranking_dict = {}
         self.node_cov = {}
         with open(candidate_path, 'r') as f:
             self.candidate_list = [ix.split(' ')[0] for ix in f.readlines()]
+            print(self.candidate_list)
         
         
        
@@ -134,7 +135,7 @@ class TaxoClean(object):
                 if indice2word[node] in self.candidate_list:
                     self.node_cov[indice2word[node]] = 1
             print(len(self.node_cov.keys()))
-            # print(self.full_size)
+            print(len(self.candidate_list))
             self.run_trainer()
             self.run_ranking()
             if len(self.node_cov.keys()) == len(self.candidate_list):
