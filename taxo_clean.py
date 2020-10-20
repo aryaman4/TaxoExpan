@@ -15,22 +15,23 @@ import sys
 from test_fast import encode_graph, rearrange
 import itertools
 from data_loader.dataset import MAGDataset
+import networkx as nx
 
 class TaxoClean(object):
     def __init__(self, config_path="./TaxoExpan/config_files/config.mag.json",candidate_path="./candidates50.txt"):
         self.config = ConfigParser(default_vals={'config_path': config_path})
         self.ranking_dict = {}
         self.node_cov = {}
-        with open(candidate_path, 'r') as f:
-            candidates = [ix for ix in f.readlines()]
-            self.candidate_list = []
-            for ix in candidates:
-                a_index = ix.index('@')
-                left_part = ix[:a_index+3]
-                l = ix[a_index+3:]
-                right_part = l.split(' ')[0]
-                self.candidate_list.append(left_part+right_part)
-            print(self.candidate_list)
+        # with open(candidate_path, 'r') as f:
+        #     candidates = [ix for ix in f.readlines()]
+        #     self.candidate_list = []
+        #     for ix in candidates:
+        #         a_index = ix.index('@')
+        #         left_part = ix[:a_index+3]
+        #         l = ix[a_index+3:]
+        #         right_part = l.split(' ')[0]
+        #         self.candidate_list.append(left_part+right_part)
+        #     print(self.candidate_list)
        
     def run_trainer(self):
         trainer = Trainer(self.model, self.loss, self.metrics, self.pre_metric, self.optimizer,
@@ -103,6 +104,8 @@ class TaxoClean(object):
         # total_metrics = torch.zeros(len(metric_fns))
         with torch.no_grad():
             for query in vocab:
+                if indice2word[query] in self.ranking_dict:
+                    continue
                 nf = torch.tensor(kv[str(query)], dtype=torch.float32).to(device)
                 expanded_nf = nf.expand(n_position, -1)
                 energy_scores = self.model.match(hg, expanded_nf)
@@ -114,17 +117,24 @@ class TaxoClean(object):
                 rank_dict = {}
                 for predict_index, parent_index in enumerate(predict_parent_idx_list):
                     rank_dict[parent_index] = predict_index
-                # true_parent_indices = node2parents[query]
-                # true_parent_rank_dict = {}
-                # for tp_index in true_parent_indices:
-                #     true_parent_rank_dict[indice2word[tp_index]] = rank_dict[tp_index]
-                # print(indice2word[query])
-                # print(true_parent_rank_dict)
+                true_parent_indices = node2parents[query]
+                top5_parents = [ix for ix in predict_parent_idx_list[:5]]
+
+                lengths = []
+                for tp_index in true_parent_indices:
+                    for pred_parent in top5_parents:
+                        try:
+                            l = nx.shortest_path_length(test_dataset.graph, source=pred_parent, target=tp_index)
+                            lengths.append(l)
+                        except:
+                            try:
+                                l = nx.shortest_path_length(test_dataset.graph, source=tp_index, target=pred_parent)
+                                lengths.append(l)
+                            except:
+                                print(indice2word[query])
                 q = indice2word[query]
                 if q not in self.ranking_dict:
-                    self.ranking_dict[q] = [indice2word[ix] for ix in predict_parent_idx_list[:5]]
-                # for rank in true_parent_rank_dict.values():
-                #     self.ranking_dict[q].append(rank)
+                    self.ranking_dict[q] = lengths
     def run_full_routine(self):
         i = 0
         while True:
@@ -135,20 +145,19 @@ class TaxoClean(object):
             vocab = test_dataset.node_list
             indice2word = test_dataset.vocab
             for node in vocab:
-                if indice2word[node] in self.candidate_list:
+                if indice2word[node] in self.ranking_dict:
                     self.node_cov[indice2word[node]] = 1
             print(len(self.node_cov.keys()))
-            print(len(self.candidate_list))
             self.run_trainer()
             self.run_ranking()
-            if len(self.node_cov.keys()) == len(self.candidate_list):
+            if len(self.node_cov.keys()) == self.full_size:
                 break
             
 
 
 if __name__ == '__main__':
     tc = TaxoClean()
-    f = open("rank_results_parents.txt", "w+")
+    f = open("rank_results_distance.txt", "w+")
     tc.run_full_routine()
     for k, v in tc.ranking_dict.items():
         f.write(str(k))
