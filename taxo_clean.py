@@ -121,8 +121,6 @@ class TaxoClean(object):
                 # print(indice2word[query])
                 # print(true_parent_rank_dict)
                 q = indice2word[query]
-                if q not in self.candidate_list:
-                    continue
                 if q not in self.ranking_dict:
                     self.ranking_dict[q] = [indice2word[ix] for ix in predict_parent_idx_list[:5]]
                 # for rank in true_parent_rank_dict.values():
